@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REDE VIVA 360 | Gestão de Linha Viva & Linha Morta - Equatorial Piauí</title>
+  
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- html2pdf.js CDN para Geração Direta de PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <meta name="theme-color" content="#ff5500">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RedeViva360">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+
+  <!-- Estilos Customizados (Laranja Mecânica & Branco) -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Barra Lateral (Sidebar) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-badge">⚡LV</div>
+        <div class="brand-info">
+          <h2>REDE VIVA 360</h2>
+          <span>Linha Viva & Morta • EQTL PI</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="dashboard-view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+          <span>Painel de Indicadores</span>
+        </button>
+
+        <button class="nav-item" data-view="checkin-view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span>Check-in / Check-out</span>
+          <span class="nav-badge" id="active-checkin-badge">0 em campo</span>
+        </button>
+
+        <button class="nav-item" data-view="rdo-view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>Relatórios RDO (LV/LM)</span>
+          <span class="nav-badge" id="rdo-count-badge">0</span>
+        </button>
+
+        <button class="nav-item" data-view="materials-view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          <span>Materiais de Distribuição</span>
+        </button>
+
+        <button class="nav-item" data-view="teams-view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Equipes Operacionais</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="live-time-card">
+          <div>
+            <div class="clock-val" id="live-clock">00:00:00</div>
+            <div class="date-val" id="live-date">--/--/----</div>
+          </div>
+          <div style="color: var(--accent-primary);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Backdrop escurecido para fechar o menu no celular -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn mobile-menu-btn" id="btn-mobile-menu" aria-label="Abrir Menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="page-title">
+            <h1 id="current-view-title">Operações em Rede de Distribuição MT/BT</h1>
+            <p id="current-view-subtitle">Controle de Linha Viva, Linha Morta, materiais técnicos e RDOs</p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Filtro de Equipe Global -->
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <label for="global-team-filter" style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 700;">Equipe:</label>
+            <select class="team-filter-select" id="global-team-filter">
+              <option value="all">Todas as Equipes de Linha</option>
+            </select>
+          </div>
+
+          <!-- Ação Rápida: Novo RDO Elétrico -->
+          <button class="btn btn-primary" id="btn-quick-new-rdo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>Novo RDO Elétrico</span>
+          </button>
+
+          <!-- Alternar Tema Dark / Light (Laranja Mecânica / Branco) -->
+          <button class="icon-btn" id="btn-toggle-theme" title="Alternar Modo Escuro / Claro">
+            <svg id="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          </button>
+
+          <!-- Gerenciar Dados / Backup -->
+          <button class="icon-btn" id="btn-open-data-modal" title="Backup e Sincronização">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- ============================================== -->
+      <!-- VIEW 1: DASHBOARD & KPIS                       -->
+      <!-- ============================================== -->
+      <section class="page-view active" id="dashboard-view">
+        <!-- Grid de KPIs Elétricos -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <h3>RDOs Emitidos (LV / LM)</h3>
+              <div class="kpi-value" id="kpi-total-rdos">0</div>
+              <div class="kpi-sub positive">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                <span id="kpi-rdos-approved-pct">100% validados</span>
+              </div>
+            </div>
+            <div class="kpi-icon orange">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <h3>Equipes de Linha Hoje</h3>
+              <div class="kpi-value" id="kpi-active-teams">0</div>
+              <div class="kpi-sub orange" id="kpi-active-teams-sub">Com check-in ativo em campo</div>
+            </div>
+            <div class="kpi-icon blue">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <h3>Horas Operacionais MT/BT</h3>
+              <div class="kpi-value" id="kpi-worked-hours">0h</div>
+              <div class="kpi-sub positive">Horas acumuladas em serviço</div>
+            </div>
+            <div class="kpi-icon green">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <h3>Materiais no Catálogo</h3>
+              <div class="kpi-value" id="kpi-total-materials">0</div>
+              <div class="kpi-sub">Chaves, isoladores, cabos e postes</div>
+            </div>
+            <div class="kpi-icon purple">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <h3>Conformidade APR / NR-10</h3>
+              <div class="kpi-value" id="kpi-punctuality">100%</div>
+              <div class="kpi-sub positive">Procedimentos de segurança OK</div>
+            </div>
+            <div class="kpi-icon orange">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Linha de Gráficos 1 -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <h3>Produtividade de Intervenções (Linha Viva & Morta)</h3>
+                <p>Evolução diária de atividades entregues x RDOs emitidos</p>
+              </div>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-productivity"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <h3>Consumo de Materiais em Rede</h3>
+                <p>Distribuição de chaves, isoladores, conectores e laços</p>
+              </div>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-materials"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Linha de Gráficos 2 -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <h3>Horas Trabalhadas por Equipe de Distribuição</h3>
+                <p>Comparativo de esforço operacional nas frentes de serviço</p>
+              </div>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-teams-hours"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <h3>Condições Climáticas & Praticabilidade</h3>
+                <p>Fatores de segurança e chuva nas manobras de rede</p>
+              </div>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-weather"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabela Resumo Recente -->
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">
+              <h3>Últimos Relatórios Diários de Linha (RDO)</h3>
+              <p>Histórico recente emitido pelas equipes de Linha Viva e Linha Morta</p>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="switchView('rdo-view')">Ver Todos os RDOs</button>
+          </div>
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Data</th>
+                  <th>Regime</th>
+                  <th>Equipe</th>
+                  <th>Subestação / Trecho</th>
+                  <th>Clima</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="recent-rdos-tbody">
+                <!-- Preenchido via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VIEW 2: CHECK-IN & CHECK-OUT                   -->
+      <!-- ============================================== -->
+      <section class="page-view" id="checkin-view">
+        <div class="checkin-layout">
+          <!-- Formulário de Registro -->
+          <div class="checkin-form-card">
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.35rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+              <span style="color: var(--accent-primary);">⚡</span> Registro de Ponto em Campo
+            </h3>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1.25rem;">Entrada ou saída de equipe de Linha Viva ou Linha Morta</p>
+
+            <form id="form-checkin-out">
+              <div class="form-group">
+                <label for="chk-team-select">Equipe Responsável *</label>
+                <select class="form-control" id="chk-team-select" required>
+                  <option value="">Selecione a equipe de linha...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="chk-leader-input">Eletricista Encarregado / Líder</label>
+                <input type="text" class="form-control" id="chk-leader-input" placeholder="Nome do encarregado em campo" required>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label for="chk-date-input">Data *</label>
+                  <input type="date" class="form-control" id="chk-date-input" required>
+                </div>
+                <div class="form-group">
+                  <label for="chk-type-select">Tipo de Registro *</label>
+                  <select class="form-control" id="chk-type-select" required>
+                    <option value="in">Check-in (Início do Turno)</option>
+                    <option value="out">Check-out (Término do Turno)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="chk-time-input">Horário do Registro *</label>
+                <div style="display: flex; gap: 0.5rem;">
+                  <input type="time" class="form-control" id="chk-time-input" required>
+                  <button type="button" class="btn btn-outline btn-sm" id="btn-set-now-time" title="Usar Horário Atual">Agora</button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="chk-location-input">Subestação / Alimentador / Trecho *</label>
+                <input type="text" class="form-control" id="chk-location-input" placeholder="Ex: SE Macaúba - AL-03 - Chave CF-1205" required>
+              </div>
+
+              <div class="form-group">
+                <label for="chk-notes-input">Observações Operacionais / APR / Despacho COD</label>
+                <textarea class="form-control" id="chk-notes-input" placeholder="Nº da APR, liberação COD, veículos ou ocorrências no turno..."></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                <span>Confirmar Registro de Turno</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Tabela de Presença Hoje -->
+          <div class="table-card" style="margin-bottom: 0;">
+            <div class="table-header">
+              <div class="table-title">
+                <h3>Equipes Operacionais em Campo</h3>
+                <p>Monitoramento de equipes ativas nas frentes de Linha Viva e Linha Morta</p>
+              </div>
+              <div class="table-actions">
+                <input type="date" class="form-control" id="checkin-date-filter" style="width: auto;">
+              </div>
+            </div>
+
+            <div class="data-table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Equipe</th>
+                    <th>Encarregado</th>
+                    <th>Entrada</th>
+                    <th>Saída</th>
+                    <th>Frente / Alimentador</th>
+                    <th>Jornada</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="checkins-tbody">
+                  <!-- Linhas preenchidas via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VIEW 3: RELATÓRIOS RDO (LINHA VIVA / MORTA)    -->
+      <!-- ============================================== -->
+      <section class="page-view" id="rdo-view">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">
+              <h3>Relatórios Diários de Operação - RDO (Linha Viva & Morta)</h3>
+              <p>Histórico detalhado com subestação, alimentador, APR, materiais instalados e avanço</p>
+            </div>
+            <div class="table-actions">
+              <input type="text" class="search-input" id="rdo-search-input" placeholder="Buscar por código, SE, alimentador ou chave...">
+              <button class="btn btn-primary" id="btn-create-rdo-top">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>Criar Novo RDO</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Data</th>
+                  <th>Regime</th>
+                  <th>Equipe</th>
+                  <th>SE / Alimentador / Trecho</th>
+                  <th>Encarregado</th>
+                  <th>Insumos</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="rdos-full-tbody">
+                <!-- Preenchido via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VIEW 4: GESTÃO DE MATERIAIS                    -->
+      <!-- ============================================== -->
+      <section class="page-view" id="materials-view">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">
+              <h3>Catálogo de Materiais & Ferragens de Rede</h3>
+              <p>Padrão Equatorial Piauí: Chaves fusíveis, para-raios, isoladores, postes DT, laços e ferragens</p>
+            </div>
+            <div class="table-actions">
+              <button class="btn btn-outline" id="btn-open-sheet-import">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                <span>Importar Planilha / CSV</span>
+              </button>
+              <button class="btn btn-outline" id="btn-open-allocate-modal" style="color: var(--accent-orange-bright); border-color: var(--accent-primary);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+                <span>Vincular Material à Viatura</span>
+              </button>
+              <button class="btn btn-primary" id="btn-open-material-modal">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>+ Cadastrar Material</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Descrição do Insumo / Material</th>
+                  <th>Categoria Técnica</th>
+                  <th>Unidade</th>
+                  <th style="text-align: center;">Saldo em Base</th>
+                  <th style="text-align: center;">Ajuste Rápido (+ / -)</th>
+                  <th style="text-align: center;">Alocado nas Viaturas</th>
+                  <th style="text-align: center;">Total Aplicado (RDOs)</th>
+                  <th style="text-align: center;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="materials-tbody">
+                <!-- Preenchido via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- VIEW 5: GESTÃO DE EQUIPES                      -->
+      <!-- ============================================== -->
+      <section class="page-view" id="teams-view">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">
+              <h3>Equipes Operacionais de Campo</h3>
+              <p>Cadastre e configure os nomes das suas frentes de Linha Viva, Linha Morta e PNR</p>
+            </div>
+            <div class="table-actions">
+              <button class="btn btn-primary" id="btn-open-team-modal">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>+ Cadastrar Nova Equipe</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1.5rem;" id="teams-cards-grid">
+            <!-- Cards gerados dinamicamente via JS -->
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: CRIAR / EDITAR RDO DE REDE DE DISTRIBUIÇÃO      -->
+  <!-- ======================================================= -->
+  <div class="modal-backdrop" id="modal-rdo">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-rdo-title">Novo Relatório Diário de Obra / Atividade (RDO)</h3>
+        <button class="icon-btn" id="btn-close-modal-rdo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form id="form-rdo">
+          <input type="hidden" id="rdo-edit-id">
+
+          <!-- Seletor de Regime Operacional: Linha Viva vs Linha Morta -->
+          <div class="regime-selector">
+            <label class="regime-option selected" id="opt-regime-lv">
+              <input type="radio" name="rdo-regime" value="Linha Viva (Energizada)" checked>
+              <div>
+                <strong style="color: var(--accent-primary); font-size: 0.95rem; display: block;">⚡ Linha Viva (Rede Energizada)</strong>
+                <span style="font-size: 0.75rem; color: var(--text-secondary);">Ao Contato / À Distância / Cesta Aérea Isolada</span>
+              </div>
+            </label>
+
+            <label class="regime-option" id="opt-regime-lm">
+              <input type="radio" name="rdo-regime" value="Linha Morta (Desenergizada)">
+              <div>
+                <strong style="color: #38bdf8; font-size: 0.95rem; display: block;">🔒 Linha Morta (Desenergizada)</strong>
+                <span style="font-size: 0.75rem; color: var(--text-secondary);">Com Bloqueio LOTO e Aterramento ATR</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Seção 1: Identificação Técnica da Rede -->
+          <div class="form-section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>1. Identificação Técnica da Rede (Padrão Equatorial)</span>
+          </div>
+
+          <div class="grid-3">
+            <div class="form-group">
+              <label for="rdo-date">Data da Atividade *</label>
+              <input type="date" class="form-control" id="rdo-date" required>
+            </div>
+            <div class="form-group">
+              <label for="rdo-team">Equipe Operacional *</label>
+              <select class="form-control" id="rdo-team" required>
+                <option value="">Selecione a equipe de linha...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="rdo-leader">Eletricista Encarregado *</label>
+              <input type="text" class="form-control" id="rdo-leader" placeholder="Nome do encarregado" required>
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div class="form-group">
+              <label for="rdo-substation">Subestação (SE) *</label>
+              <input type="text" class="form-control" id="rdo-substation" placeholder="Ex: SE Macaúba, SE Parnaíba I, SE Picos" required>
+            </div>
+            <div class="form-group">
+              <label for="rdo-feeder">Alimentador MT *</label>
+              <input type="text" class="form-control" id="rdo-feeder" placeholder="Ex: AL-03 (13.8kV) ou AL-01 (34.5kV)" required>
+            </div>
+            <div class="form-group">
+              <label for="rdo-os">Nº da Ordem de Serviço (OS / OT)</label>
+              <input type="text" class="form-control" id="rdo-os" placeholder="Ex: OS-88421/2026">
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="rdo-location">Local / Trecho / Chave / Município *</label>
+              <input type="text" class="form-control" id="rdo-location" placeholder="Ex: Chave CF-1205, Av. Raul Lopes - Teresina/PI" required>
+            </div>
+            <div class="form-group">
+              <label for="rdo-structure">Tipo de Estrutura da Rede (NT.00006)</label>
+              <select class="form-control" id="rdo-structure">
+                <option value="Estrutura N1 (Tangente Simples MT)">Estrutura N1 (Tangente Simples MT - NT.00006)</option>
+                <option value="Estrutura N2 (Ângulo com Cruzeta)">Estrutura N2 (Ângulo com Cruzeta - NT.00006)</option>
+                <option value="Estrutura N3 / N4 (Ancoragem / Fim de Linha)">Estrutura N3 / N4 (Ancoragem / Fim de Linha - NT.00006)</option>
+                <option value="Estrutura M1 / M2 (Beco / Bandeira)">Estrutura M1 / M2 (Beco / Bandeira - NT.00006)</option>
+                <option value="Estrutura Especial para BRT (Banco Regulador de Tensão - NT.00006 / NT.00022)">Estrutura Especial para BRT (Banco Regulador de Tensão - NT.00006 / NT.00022)</option>
+                <option value="Estrutura com Chave By-pass / Seccionadora de BRT">Estrutura com Chave By-pass / Seccionadora de BRT</option>
+                <option value="Estrutura de Lançamento e Tracionamento de Condutores MT/BT">Estrutura de Lançamento e Tracionamento de Condutores MT/BT</option>
+                <option value="Rede Compacta Protegida Spacer Cable (CE1 a CE4)">Rede Compacta Protegida Spacer Cable (CE1 a CE4)</option>
+                <option value="Subestação Aérea com Transformador">Subestação Aérea com Transformador</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Seção 2: Procedimentos de Segurança & NR-10 -->
+          <div class="form-section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>2. Segurança, APR e Condições Climáticas</span>
+          </div>
+
+          <div class="grid-3">
+            <div class="form-group">
+              <label for="rdo-apr">Nº da APR (Análise Preliminar de Risco)</label>
+              <input type="text" class="form-control" id="rdo-apr" placeholder="Ex: APR-2026/9941">
+            </div>
+            <div class="form-group">
+              <label>Clima Manhã</label>
+              <select class="form-control" id="rdo-weather-morning">
+                <option value="Ensolarado">☀️ Ensolarado</option>
+                <option value="Nublado">⛅ Nublado</option>
+                <option value="Chuva Leve">🌦️ Chuva Leve</option>
+                <option value="Chuvoso">🌧️ Chuva Forte (Paralisação)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Clima Tarde</label>
+              <select class="form-control" id="rdo-weather-afternoon">
+                <option value="Ensolarado">☀️ Ensolarado</option>
+                <option value="Nublado">⛅ Nublado</option>
+                <option value="Chuva Leve">🌦️ Chuva Leve</option>
+                <option value="Chuvoso">🌧️ Chuva Forte (Paralisação)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="background: rgba(255, 85, 0, 0.05); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 0.5rem;">Checklist de Segurança Obrigatório (SEP / NR-10):</div>
+            <div class="grid-2" style="font-size: 0.8rem;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="chk-apr-ok" checked> APR preenchida e assinada por toda a equipe
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="chk-ppe-ok" checked> EPIs e EPCs (luvas MT, mantas, bastões) inspecionados
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="chk-atr-ok"> Aterramento Temporário (ATR) instalado (se Linha Morta)
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="chk-dielectric-ok" checked> Teste dielétrico do caminhão com cesta aérea em dia
+              </label>
+            </div>
+          </div>
+
+          <!-- Seção 3: Efetivo da Equipe -->
+          <div class="form-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+              <span>3. Efetivo / Profissionais na Frente de Obra</span>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-add-labor-row">+ Adicionar Função</button>
+          </div>
+          <div id="labor-rows-container"></div>
+
+          <!-- Seção 4: Atividades Realizadas -->
+          <div class="form-section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+              <span>4. Atividades de Linha Executadas & Avanço</span>
+            </div>
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+              <button type="button" class="btn btn-outline btn-sm" id="btn-quick-act-brt" style="color: #ff5500; border-color: rgba(255, 85, 0, 0.4);" title="Carregar atividades padrão de instalação de Banco Regulador de Tensão (NT.00006)">⚡ + Atividades BRT</button>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-quick-act-cabos" style="color: #0284c7; border-color: rgba(2, 132, 199, 0.4);" title="Carregar atividades padrão de lançamento e tracionamento de cabos">⚡ + Atividades Cabos</button>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-add-activity-row">+ Adicionar Atividade</button>
+            </div>
+          </div>
+          <div id="activity-rows-container"></div>
+
+          <!-- Seção 5: Materiais Aplicados (Com botão rápido para cadastrar novo material) -->
+          <div class="form-section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+              <span>5. Materiais & Equipamentos Aplicados na Rede</span>
+            </div>
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+              <button type="button" class="btn btn-outline btn-sm" id="btn-quick-mat-brt" style="color: #ff5500; border-color: rgba(255, 85, 0, 0.4);" title="Inserir insumos normativos de BRT: Chaves bypass, para-raios, cabo aterramento">⚡ + Insumos BRT</button>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-quick-mat-cabos" style="color: #0284c7; border-color: rgba(2, 132, 199, 0.4);" title="Inserir insumos normativos de condutores: Cabos 1/0, alças, laços, emendas">⚡ + Insumos Cabos</button>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-quick-add-material-to-catalog" style="color: var(--accent-primary); border-color: var(--accent-primary);" title="Adicionar um novo material ao catálogo master">+ Cadastrar Novo Material</button>
+              <button type="button" class="btn btn-primary btn-sm" id="btn-add-material-row">+ Inserir Linha de Material</button>
+            </div>
+          </div>
+          <div id="material-rows-container"></div>
+
+          <!-- Seção 6: Ocorrências e Observações -->
+          <div class="form-section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span>6. Ocorrências / Interrupções & Planejamento COD</span>
+          </div>
+
+          <div class="form-group">
+            <label for="rdo-occurrences">Ocorrências / Registro de Desligamento / Imprevistos</label>
+            <textarea class="form-control" id="rdo-occurrences" placeholder="Ex: Intervenção sob potencial sem interrupção de clientes. Ou: Desligamento programado das 08h às 12h autorizado pelo COD..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="rdo-observations">Observações Finais & Próximo Trecho Programado</label>
+            <textarea class="form-control" id="rdo-observations" placeholder="Ex: Programada continuação do recondutoramento para o vão P24 a P28 amanhã..."></textarea>
+          </div>
+
+          <!-- Seção 7: Registro Fotográfico -->
+          <div class="form-section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+            <span>7. Registro Fotográfico de Campo (Cruzetas, Postes, Chaves)</span>
+          </div>
+
+          <div class="photo-upload-zone" id="photo-upload-zone">
+            <input type="file" id="rdo-photos-input" multiple accept="image/*" style="display: none;">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 0.5rem; color: var(--accent-primary);"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            <p style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">Clique para anexar fotos das estruturas e manobras</p>
+            <p style="font-size: 0.75rem; color: var(--text-secondary);">Formatos PNG, JPG ou WEBP suportados</p>
+          </div>
+          <div class="photo-preview-grid" id="photo-preview-grid"></div>
+
+          <!-- Seção 8: Croqui de Execução Técnica (Canvas EXTEC) -->
+          <div class="form-section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
+              <span>8. Croqui de Execução Técnica (Canvas EXTEC) & Traçado de Rede</span>
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-outline btn-sm" id="btn-draw-template-brt" title="Carregar desenho técnico de Banco Regulador de Tensão (BRT)">
+                ⚡ Esboço BRT
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-draw-template-cabos" title="Carregar desenho técnico de Lançamento de Cabos MT no vão">
+                ⚡ Esboço Lançamento Cabos
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-clear-canvas-extec" style="color: var(--accent-danger); border-color: rgba(239, 68, 68, 0.4);" title="Limpar todo o croqui">
+                🗑️ Limpar
+              </button>
+            </div>
+          </div>
+
+          <div class="canvas-extec-wrapper">
+            <!-- Barra de Ferramentas de Desenho -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
+              <!-- Ferramentas -->
+              <div style="display: flex; gap: 4px; align-items: center;">
+                <button type="button" class="btn-canvas-tool active" data-tool="pen" title="Caneta livre">✏️ Caneta</button>
+                <button type="button" class="btn-canvas-tool" data-tool="line" title="Linha reta (condutores e vãos)">📏 Linha Reta</button>
+                <button type="button" class="btn-canvas-tool" data-tool="eraser" title="Borracha">🧽 Borracha</button>
+              </div>
+
+              <!-- Carimbos Rápidos de Engenharia -->
+              <div style="display: flex; gap: 4px; align-items: center;">
+                <span style="font-size: 11px; font-weight: 700; color: #475569; margin-right: 2px;">Carimbos:</span>
+                <button type="button" class="btn-canvas-stamp" data-stamp="poste" title="Carimbar Poste DT">⚲ Poste</button>
+                <button type="button" class="btn-canvas-stamp" data-stamp="brt" title="Carimbar Banco Regulador BRT">⚡ BRT</button>
+                <button type="button" class="btn-canvas-stamp" data-stamp="chave" title="Carimbar Chave Fusível/Faca">⫰ Chave</button>
+                <button type="button" class="btn-canvas-stamp" data-stamp="trafo" title="Carimbar Transformador">◬ Trafo</button>
+                <button type="button" class="btn-canvas-stamp" data-stamp="atr" title="Carimbar Aterramento ATR">⏚ ATR</button>
+              </div>
+
+              <!-- Cores e Espessura -->
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <div style="display: flex; gap: 4px;" id="canvas-color-palette">
+                  <button type="button" class="color-dot active" data-color="#ff5500" style="background: #ff5500;" title="Laranja Linha Viva"></button>
+                  <button type="button" class="color-dot" data-color="#0f172a" style="background: #0f172a;" title="Preto Poste/Circuito"></button>
+                  <button type="button" class="color-dot" data-color="#ef4444" style="background: #ef4444;" title="Vermelho Fase"></button>
+                  <button type="button" class="color-dot" data-color="#0284c7" style="background: #0284c7;" title="Azul Neutro/Morta"></button>
+                  <button type="button" class="color-dot" data-color="#16a34a" style="background: #16a34a;" title="Verde Aterramento"></button>
+                </div>
+                <select id="canvas-line-width" style="font-size: 11px; padding: 2px 4px; border-radius: 4px; border: 1px solid #cbd5e1; height: 26px;">
+                  <option value="2">2px (Fino)</option>
+                  <option value="4" selected>4px (Normal)</option>
+                  <option value="8">8px (Grosso)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Área do Canvas com Grade Técnica -->
+            <div style="position: relative; width: 100%; height: 320px; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; background: #ffffff;">
+              <canvas id="canvas-extec" width="860" height="320" style="width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair;"></canvas>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 11px; color: #64748b;">
+              <span>💡 <strong>Dica de Campo:</strong> Desenhe com o dedo, caneta stylus ou mouse. Clique em <em>"⚡ Esboço BRT"</em> ou <em>"⚡ Esboço Lançamento Cabos"</em> para preencher o croqui automaticamente.</span>
+              <span id="canvas-coords">X: 0, Y: 0</span>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="btn-cancel-rdo">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-save-rdo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>Salvar Relatório RDO</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: VISUALIZAR RDO FORMATADO (FOLHA TÉCNICA OFICIAL) -->
+  <!-- ======================================================= -->
+  <div class="modal-backdrop" id="modal-view-rdo">
+    <div class="modal-dialog" style="max-width: 950px;">
+      <div class="modal-header">
+        <h3>Folha Oficial de Relatório Diário de Obra - RDO</h3>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn btn-whatsapp" id="btn-share-rdo-whatsapp" title="Enviar resumo formatado com emojis no WhatsApp">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            <span>WhatsApp</span>
+          </button>
+          <button class="btn btn-pdf" id="btn-download-rdo-pdf">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Baixar PDF</span>
+          </button>
+          <button class="btn btn-primary" id="btn-print-rdo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>Imprimir</span>
+          </button>
+          <button class="icon-btn" id="btn-close-view-rdo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-body" style="background-color: #3b4252; padding: 1.5rem;">
+        <div class="rdo-document-sheet" id="rdo-sheet-container">
+          <!-- Conteúdo gerado dinamicamente via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: CADASTRAR NOVO MATERIAL                         -->
+  <!-- ======================================================= -->
+  <div class="modal-backdrop" id="modal-material">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3>Cadastrar Material no Catálogo Master</h3>
+        <button class="icon-btn" id="btn-close-modal-material">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="form-material">
+          <div class="form-group">
+            <label for="mat-name-input">Descrição do Material / Insumo *</label>
+            <input type="text" class="form-control" id="mat-name-input" placeholder="Ex: Chave fusível 15kV ou Isolador pilar 36kV" required>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="mat-category-input">Categoria Técnica</label>
+              <select class="form-control" id="mat-category-input">
+                <option value="Chaves & Proteção">Chaves & Proteção</option>
+                <option value="Ferramental Linha Viva">Ferramental Linha Viva</option>
+                <option value="Preformados & Fixação">Preformados & Fixação</option>
+                <option value="Conexões & Emendas">Conexões & Emendas</option>
+                <option value="Isoladores & Cruzetas">Isoladores & Cruzetas</option>
+                <option value="Ferragens & Fixação">Ferragens & Fixação</option>
+                <option value="Cabos & Condutores">Cabos & Condutores</option>
+                <option value="Postes & Cruzetas">Postes & Cruzetas</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="mat-unit-input">Unidade de Medida *</label>
+              <input type="text" class="form-control" id="mat-unit-input" placeholder="Ex: peças, unidades, metros" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="mat-default-qty">Quantidade Inicial em Estoque / Sugerida</label>
+            <input type="number" class="form-control" id="mat-default-qty" value="50" min="0" step="any">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="btn-cancel-material">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-save-material">Salvar Material</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: IMPORTAR DA PLANILHA GOOGLE OU CSV              -->
+  <!-- ======================================================= -->
+  <div class="modal-backdrop" id="modal-sheet-import">
+    <div class="modal-dialog" style="max-width: 640px;">
+      <div class="modal-header">
+        <h3>Importar Materiais da Planilha Google / CSV</h3>
+        <button class="icon-btn" id="btn-close-modal-sheet-import">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          Você pode <strong>copiar as linhas de materiais diretamente da sua Planilha Google ou Excel</strong> e colar abaixo para alimentar o catálogo automaticamente.
+        </p>
+
+        <div class="form-group">
+          <label for="sheet-url-input">Opção 1: Link CSV da Planilha Google (Opcional)</label>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="url" class="form-control" id="sheet-url-input" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv">
+            <button type="button" class="btn btn-outline" id="btn-fetch-sheet-url">Buscar</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+          <label for="sheet-pasted-data">Opção 2: Colar Células Copiadas do Google Sheets / Excel</label>
+          <textarea class="form-control" id="sheet-pasted-data" style="min-height: 140px; font-family: monospace; font-size: 0.8rem;" placeholder="Exemplo de linhas copiadas do Sheets:
+Chave fusível 15kV	Chaves & Proteção	unidades	20
+Para-raios 15kV	Chaves & Proteção	unidades	15
+Laço 1/0	Preformados	peças	50
+Isolador pilar 15kV	Isoladores	peças	30"></textarea>
+          <span style="font-size: 0.725rem; color: var(--text-muted); margin-top: 0.25rem; display: block;">Basta copiar as células na planilha (Ctrl+C) e colar nesta caixa. Suporta Tabulação, Ponto e Vírgula (;) ou Vírgula (,).</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="btn-cancel-sheet-import">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-process-sheet-import">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>Processar e Adicionar Insumos</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: CAUTELA / MATERIAIS DA VIATURA (EQUIPE)         -->
+  <!-- ======================================================= -->
+  <div class="modal-backdrop" id="modal-team-cautela">
+    <div class="modal-dialog" style="max-width: 840px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="cautela-team-title">Materiais na Viatura - Equipe</h3>
+          <span style="font-size: 0.8rem; color: var(--text-secondary);" id="cautela-team-subtitle">Controle de insumos e ferragens em poder da equipe</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-pdf btn-sm" id="btn-download-cautela-pdf">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Gerar PDF da Cautela</span>
+          </button>
+          <button class="icon-btn" id="btn-close-modal-cautela">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <!-- Formulário Rápido de Cautela de Material -->
+        <div style="background: rgba(255, 85, 0, 0.06); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+          <h4 style="font-size: 0.9rem; font-weight: 800; color: var(--accent-orange-bright); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Carregar Novo Material nesta Viatura</span>
+          </h4>
+          <form id="form-add-to-vehicle" style="display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap;">
+            <input type="hidden" id="cautela-target-team-id">
+            <div style="flex: 3; min-width: 220px;">
+              <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-primary); display: block; margin-bottom: 4px;">Material do Almoxarifado Base</label>
+              <select class="form-control" id="cautela-mat-select" required></select>
+            </div>
+            <div style="flex: 1; min-width: 90px;">
+              <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-primary); display: block; margin-bottom: 4px;">Qtd a Carregar</label>
+              <input type="number" class="form-control" id="cautela-qty-input" value="5" min="1" step="any" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height: 38px;">
+              <span>+ Carregar na Viatura</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Documento Imprimível e Tabela de Materiais Atuais na Viatura -->
+        <div id="cautela-sheet-printable">
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Material / Insumo na Viatura</th>
+                  <th style="text-align: center;">Qtd em Poder da Equipe</th>
+                  <th style="text-align: center;">Unidade</th>
+                  <th style="text-align: center;">Ações de Movimentação</th>
+                </tr>
+              </thead>
+              <tbody id="cautela-materials-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: VINCULAR MATERIAL A QUALQUER EQUIPE             -->
+  <!-- ======================================================= -->
+  <div class="modal-backdrop" id="modal-allocate-material">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3>Vincular Material a uma Viatura / Equipe</h3>
+        <button class="icon-btn" id="btn-close-modal-allocate">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="form-allocate-material">
+          <div class="form-group">
+            <label for="alloc-team-select">Equipe / Viatura de Destino *</label>
+            <select class="form-control" id="alloc-team-select" required></select>
+          </div>
+          <div class="form-group">
+            <label for="alloc-material-select">Material / Insumo *</label>
+            <select class="form-control" id="alloc-material-select" required></select>
+          </div>
+          <div class="form-group">
+            <label for="alloc-qty-input">Quantidade a Vincular / Transferir *</label>
+            <input type="number" class="form-control" id="alloc-qty-input" value="5" min="1" step="any" required>
+            <span style="font-size: 0.725rem; color: var(--text-muted); margin-top: 4px; display: block;" id="alloc-stock-feedback">Saldo disponível na base: --</span>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="btn-cancel-allocate">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-save-allocate">Confirmar Vinculação</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: MOVIMENTAÇÃO RÁPIDA DE ESTOQUE (+ / -)           -->
+  <!-- ======================================================= -->
+  <div class="modal-backdrop" id="modal-stock-movement">
+    <div class="modal-dialog" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 id="stock-modal-title">Movimentar Quantidade de Material</h3>
+        <button class="icon-btn" id="btn-close-modal-stock">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="form-stock-movement">
+          <input type="hidden" id="stock-mat-id">
+          <div style="background: var(--bg-card); padding: 0.85rem; border-radius: var(--radius-md); margin-bottom: 1rem; border: 1px solid var(--border-color);">
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">Material Selecionado:</div>
+            <strong style="font-size: 1.05rem; color: var(--accent-orange-bright);" id="stock-mat-name">--</strong>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Saldo Atual na Base: <strong id="stock-mat-current" style="color: #fff;">0</strong></div>
+          </div>
+
+          <div class="form-group">
+            <label for="stock-move-type">Tipo de Operação *</label>
+            <select class="form-control" id="stock-move-type" required>
+              <option value="add">➕ Entrada de Estoque (Compra / Recebimento)</option>
+              <option value="sub">➖ Saída / Baixa de Estoque (Avaria / Descarte)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="stock-move-qty">Quantidade a Movimentar *</label>
+            <input type="number" class="form-control" id="stock-move-qty" value="10" min="1" step="any" required>
+          </div>
+
+          <div class="form-group">
+            <label for="stock-move-reason">Motivo / Nº Nota Fiscal / Observação</label>
+            <input type="text" class="form-control" id="stock-move-reason" placeholder="Ex: NF 1824 ou Reposição mensal">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="btn-cancel-stock">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-save-stock">Confirmar Movimentação</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: CADASTRAR NOVA EQUIPE                           -->
+  <!-- ======================================================= -->
+  <div class="modal-backdrop" id="modal-team">
+    <div class="modal-dialog" style="max-width: 540px;">
+      <div class="modal-header">
+        <h3 id="modal-team-title">Cadastrar Nova Equipe de Distribuição</h3>
+        <button class="icon-btn" id="btn-close-modal-team">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="form-team">
+          <input type="hidden" id="team-edit-id" value="">
+          <div class="form-group">
+            <label for="team-name-input">Nome / Código da Equipe *</label>
+            <input type="text" class="form-control" id="team-name-input" placeholder="Ex: [LV-03] Equipe Linha Viva - Parnaíba" required>
+          </div>
+          <div class="form-group">
+            <label for="team-specialty-input">Especialidade / Foco Operacional</label>
+            <input type="text" class="form-control" id="team-specialty-input" placeholder="Ex: Linha Viva MT Cesta Aérea ou Linha Morta & Obras">
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="team-leader-input">Eletricista Encarregado *</label>
+              <input type="text" class="form-control" id="team-leader-input" placeholder="Nome do encarregado" required>
+            </div>
+            <div class="form-group">
+              <label for="team-contact-input">Telefone / Rádio Operacional</label>
+              <input type="text" class="form-control" id="team-contact-input" placeholder="(86) 99999-9999">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="team-members-count">Efetivo da Equipe</label>
+              <input type="number" class="form-control" id="team-members-count" value="4" min="1">
+            </div>
+            <div class="form-group">
+              <label for="team-color-input">Cor de Identificação</label>
+              <input type="color" class="form-control" id="team-color-input" value="#ff5500" style="height: 42px; padding: 2px;">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="btn-cancel-team">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-save-team">
+          <span id="btn-save-team-text">Salvar Equipe</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: GERENCIAMENTO DE DADOS & BACKUP                 -->
+  <!-- ======================================================= -->
+  <div class="modal-backdrop" id="modal-data">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3>Backup & Sincronização de Dados</h3>
+        <button class="icon-btn" id="btn-close-modal-data">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+          Todos os registros de Linha Viva, Linha Morta, materiais e check-ins estão salvos no armazenamento local do seu navegador.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+          <button class="btn btn-outline" id="btn-export-json" style="justify-content: flex-start; padding: 0.85rem 1rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <div style="text-align: left;">
+              <div style="font-weight: 700; color: var(--text-primary);">Exportar Dados (Backup JSON)</div>
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">Baixar cópia de segurança completa do sistema</div>
+            </div>
+          </button>
+
+          <label class="btn btn-outline" style="justify-content: flex-start; padding: 0.85rem 1rem; cursor: pointer;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <div style="text-align: left;">
+              <div style="font-weight: 700; color: var(--text-primary);">Restaurar Backup JSON</div>
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">Carregar dados salvos anteriormente</div>
+            </div>
+            <input type="file" id="import-json-input" accept=".json" style="display: none;">
+          </label>
+
+          <button class="btn btn-outline" id="btn-reset-data" style="justify-content: flex-start; padding: 0.85rem 1rem; color: var(--accent-danger); border-color: rgba(239, 68, 68, 0.3);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+            <div style="text-align: left;">
+              <div style="font-weight: 700;">Resetar para Dados Padrão (Equatorial PI)</div>
+              <div style="font-size: 0.75rem; opacity: 0.8;">Recarregar materiais específicos de Linha Viva e RDOs de exemplo</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: ENVIAR RDO NO WHATSAPP COM TEXTO E EMOJIS        -->
+  <!-- ======================================================= -->
+  <div class="modal-backdrop" id="modal-rdo-whatsapp">
+    <div class="modal-dialog" style="max-width: 620px;">
+      <div class="modal-header" style="background: #075e54; color: #ffffff;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          <h3 style="color: #ffffff; margin: 0; font-size: 1.1rem;">Enviar RDO no WhatsApp (Texto com Emojis)</h3>
+        </div>
+        <button class="icon-btn" id="btn-close-modal-whatsapp" style="color: #ffffff;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="background: #e5ddd5; padding: 1.25rem;">
+        <div style="background: #dcf8c6; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.15); padding: 0.85rem; position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 11px; color: #128c7e; font-weight: bold;">
+            <span>💬 Prévia da Mensagem Formatada</span>
+            <span>Padrão WhatsApp Equatorial</span>
+          </div>
+          <textarea id="whatsapp-rdo-text" class="form-control" rows="15" style="width: 100%; font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; line-height: 1.45; background: #ffffff; color: #111b21; border: 1px solid #128c7e; border-radius: 6px; padding: 0.75rem; resize: vertical;" readonly></textarea>
+        </div>
+        <p style="margin-top: 0.75rem; font-size: 11.5px; color: #4b5563; text-align: center;">
+          💡 <em>O texto já vem 100% formatado com emojis, marcadores e negritos (*palavra*). Você pode copiar com 1 clique ou enviar direto para contatos e grupos de equipe no WhatsApp.</em>
+        </p>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; background: #f0f2f5;">
+        <button type="button" class="btn btn-outline" id="btn-cancel-whatsapp">Fechar</button>
+        <div style="display: flex; gap: 0.5rem;">
+          <button type="button" class="btn btn-outline" id="btn-copy-whatsapp-text" style="background: #ffffff; border-color: #25D366; color: #075e54; font-weight: bold;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span id="btn-copy-whatsapp-label">Copiar Texto Formatado</span>
+          </button>
+          <button type="button" class="btn btn-whatsapp" id="btn-open-whatsapp-link" style="border: none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            <span>Enviar no WhatsApp</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="seed-data.js"></script>
+  <script src="app.js"></script>
+
+  <!-- Registro de Service Worker (PWA para Android & Google Play) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('PWA ServiceWorker ativo:', reg.scope))
+          .catch(err => console.log('ServiceWorker não registrado (ambiente local file:// ou sem https):', err));
+      });
+    }
+  </script>
+</body>
+</html>

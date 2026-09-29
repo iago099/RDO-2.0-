@@ -1,0 +1,17 @@
+{
+  "name": "Rede Viva 360 - Gestao de Linha Viva e Distribuicao",
+  "short_name": "RedeViva360",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0f17",
+  "theme_color": "#ff5500",
+  "description": "Sistema especializado de equipes, RDOs, check-in e gestao de materiais para redes eletricas de distribuicao (Equatorial Piaui).",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
